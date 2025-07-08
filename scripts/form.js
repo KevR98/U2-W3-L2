@@ -38,21 +38,33 @@ resetButton.addEventListener('click', function () {
   localStorage.removeItem(memoryKey);
 }); */
 
-// Selettori
+const LS_KEY = 'nomiUtenti';
 const input = document.getElementById('input');
-const salvaBtn = document.getElementById('save');
-const resettaBtn = document.getElementById('reset');
+const saveBtn = document.getElementById('save');
+const resetBtn = document.getElementById('reset');
 const nameDiv = document.getElementById('name');
 
-const LS_KEY = 'nomeUtente';
+// Funzione per leggere l'array dei nomi da localStorage
+function getNomiSalvati() {
+  const dati = localStorage.getItem(LS_KEY);
+  return dati ? JSON.parse(dati) : [];
+}
 
-// Funzione per mostrare il nome salvato sopra l'input
-function mostraNomeSalvato() {
-  const nomeSalvato = localStorage.getItem(LS_KEY);
-  if (nomeSalvato) {
+// Funzione per salvare l'array di nomi in localStorage
+function setNomiSalvati(nomiArray) {
+  localStorage.setItem(LS_KEY, JSON.stringify(nomiArray));
+}
+
+// Mostra tutti i nomi salvati sopra l'input
+function mostraNomiSalvati() {
+  const nomi = getNomiSalvati();
+  if (nomi.length > 0) {
     nameDiv.innerHTML = `
       <div class="alert alert-primary" role="alert">
-        Nome salvato: <strong>${nomeSalvato}</strong>
+        Nomi salvati:<br>
+        <strong>${nomi
+          .map((n) => `<span class="badge bg-info text-dark m-1">${n}</span>`)
+          .join('')}</strong>
       </div>
     `;
   } else {
@@ -60,24 +72,26 @@ function mostraNomeSalvato() {
   }
 }
 
-// Azione bottone SALVA
-salvaBtn.addEventListener('click', () => {
+// Salva il nome nell'array in localStorage
+saveBtn.addEventListener('click', function () {
   const nome = input.value.trim();
   if (nome) {
-    localStorage.setItem(LS_KEY, nome);
-    mostraNomeSalvato();
+    const nomi = getNomiSalvati();
+    nomi.push(nome); // aggiungi il nome alla fine dell'array
+    setNomiSalvati(nomi);
+    mostraNomiSalvati();
     input.value = '';
     input.focus();
   }
 });
 
-// Azione bottone RESETTA
-resettaBtn.addEventListener('click', () => {
+// Reset: svuota tutto l'array
+resetBtn.addEventListener('click', function () {
   localStorage.removeItem(LS_KEY);
-  mostraNomeSalvato();
+  mostraNomiSalvati();
   input.value = '';
   input.focus();
 });
 
-// Mostra il valore salvato al caricamento della pagina
-mostraNomeSalvato();
+// All'avvio mostra i nomi già salvati
+mostraNomiSalvati();
